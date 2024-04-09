@@ -7,4 +7,9 @@
 
 ## Method
 ### Transformer as Encoder
-#### 
+#### Image Sequentialization: 먼저 입력 이미지를 patch sequence로 나누어 token화를 한다. 각 patch의 크기는 P X P 크기이다.
+#### Patch Embedding: linear projection을 사용해 벡터화된 patch들을 D차원 embedding 공간으로 mapping하고 위치 정보를 위해 positional encoding을 해준다. 그런 다음 patch들은 Multihead Self-Attention(MSA)와 Multi-Layer Perceptron(MLP)로 구성된 Transformer에 입력된다.
+### TransUNet
+#### segmentation을 위해 transformer에서 encoding된 representation을 최대 해상도로 upsampling을 수행한다, 즉 HW/P^2에서 H/P X W/P로 변환(sequence -> image). 그런 다음 class수에 맞추기 위해 1X1 conv를 사용하고 최종 이미지 크기로 복구하기 위해 bilinear upsampling을 한다. Transformer와 단순 upsampling을 결합하는 것도 좋지만 H/P X W/P가 원본 이미지 크기에 비해 작아 세부정보의 손실이 있을 수 있기 때문에 encoder로 Hybrid CNN-Transfomer와 Cascaded Upsampler를 사용함
+#### CNN-Transformer Hybrid as Encoder: 순수 Transfomer를 사용하는 대신 CNN을 먼저 사용하여 특성 맵을 생성하고 추출된 특성 맵을 patch화 시키게 된다. 이러한 이유는 decoding 중에 중간 크기의 고해상도 CNN 특성 맵을 활용할 수 있고, Hybrid CNN-Transformer가 순수 Transformer보다 더 좋은 성능을 내는 것을 확인함
+#### Cascaded Upsampler: 여러 upsampling 단계로 구성된 cascaded upsampler를 제안하였고, Hybrid encoder와 함께 Cascaded Upsampler가 U자형 구조를 형성해 skip connection을 통해 다양한 해상도에서의 feature를 활용할 수 있다.
